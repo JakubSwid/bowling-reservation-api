@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: bowling-postgres
+    environment:
+      POSTGRES_DB: bowling
+      POSTGRES_USER: bowling
+      POSTGRES_PASSWORD: bowling
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
