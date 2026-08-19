@@ -1,0 +1,6 @@
+CREATE TABLE lane (
+    id BIGSERIAL PRIMARY KEY,
+    lane_number INT NOT NULL UNIQUE,
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    version INT NOT NULL DEFAULT 0
+);
