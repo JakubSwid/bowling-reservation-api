@@ -1,6 +1,7 @@
 package pl.bowling.reservation.entity;
 
 import jakarta.persistence.*;
+import pl.bowling.reservation.enums.Status;
 
 
 @Entity
@@ -13,8 +14,9 @@ public class Lane {
     @Column(nullable = false, unique = true)
     private Integer laneNumber;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private Status status;
 
     @Version
     private Integer version;
@@ -34,11 +36,11 @@ public class Lane {
         this.laneNumber = laneNumber;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
