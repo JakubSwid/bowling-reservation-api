@@ -4,6 +4,8 @@ import jakarta.validation.constraints.Positive;
 import org.springframework.stereotype.Service;
 import pl.bowling.reservation.dto.CreateLaneRequest;
 import pl.bowling.reservation.entity.Lane;
+import pl.bowling.reservation.enums.Status;
+import pl.bowling.reservation.exception.LaneAlreadyExistsException;
 import pl.bowling.reservation.repository.LaneRepository;
 
 import java.util.List;
@@ -25,10 +27,11 @@ public class LaneService {
     public Lane createLane( CreateLaneRequest request){
 
         if(repository.existsByLaneNumber(request.laneNumber()))
-            throw new RuntimeException("Lane already exists");
-        // TODO: napisz sensowny błąd z controller advice
+            throw new LaneAlreadyExistsException(request.laneNumber());
+
 
         Lane lane = new Lane();
+        lane.setStatus(Status.ACTIVE);
         lane.setLaneNumber(request.laneNumber());
         return repository.save(lane);
 
