@@ -30,4 +30,20 @@ public class GlobalExceptionHandler {
 
         return problemDetail;
     }
+
+    @ExceptionHandler(LaneDoesntExistException.class)
+    public ProblemDetail handleLaneDoesntExist(
+            LaneDoesntExistException ex,
+            HttpServletRequest request
+    ) {
+
+        log.warn("Lane not found. Path: {}. Message: {}", request.getRequestURI(), ex.getMessage());
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+
+        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty("path", request.getRequestURI());
+
+        return problemDetail;
+    }
 }

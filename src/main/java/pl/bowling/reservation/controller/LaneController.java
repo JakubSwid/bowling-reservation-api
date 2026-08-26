@@ -25,9 +25,22 @@ public class LaneController {
         return service.getAllLanes();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Lane> getLane(@PathVariable Long id){
+        Lane requestedLane = service.getLane(id);
+        return ResponseEntity.status(HttpStatus.OK).body(requestedLane);
+    }
+
     @PostMapping
     public ResponseEntity<Lane> addLane(@RequestBody @Valid CreateLaneRequest laneNumber){
         Lane createdLane = service.createLane(laneNumber);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdLane);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteLane(@PathVariable Long id){
+        service.deleteLane(id);
+    }
+
 }
