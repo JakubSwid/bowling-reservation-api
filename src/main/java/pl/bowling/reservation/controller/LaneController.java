@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.bowling.reservation.dto.CreateLaneRequest;
+import pl.bowling.reservation.dto.UpdateLaneRequest;
 import pl.bowling.reservation.entity.Lane;
-import pl.bowling.reservation.repository.LaneRepository;
 import pl.bowling.reservation.service.LaneService;
 
 import java.util.List;
@@ -43,4 +43,9 @@ public class LaneController {
         service.deleteLane(id);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Lane> updateLane(@RequestBody @Valid UpdateLaneRequest request, @PathVariable Long id){
+        Lane updatedLane = service.updateLane(request, id);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedLane);
+    }
 }

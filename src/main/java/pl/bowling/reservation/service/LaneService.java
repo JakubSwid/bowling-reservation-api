@@ -3,6 +3,7 @@ package pl.bowling.reservation.service;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import pl.bowling.reservation.dto.CreateLaneRequest;
+import pl.bowling.reservation.dto.UpdateLaneRequest;
 import pl.bowling.reservation.entity.Lane;
 import pl.bowling.reservation.enums.Status;
 import pl.bowling.reservation.exception.LaneAlreadyExistsException;
@@ -17,18 +18,18 @@ public class LaneService {
 
     private final LaneRepository repository;
 
-    public LaneService(LaneRepository repository){
+    public LaneService(LaneRepository repository) {
         this.repository = repository;
     }
 
-    public List<Lane> getAllLanes(){
+    public List<Lane> getAllLanes() {
         return repository.findAll();
     }
 
 
-    public Lane createLane( CreateLaneRequest request){
+    public Lane createLane(CreateLaneRequest request) {
 
-        if(repository.existsByLaneNumber(request.laneNumber()))
+        if (repository.existsByLaneNumber(request.laneNumber()))
             throw new LaneAlreadyExistsException(request.laneNumber());
 
         Lane lane = new Lane();
@@ -37,19 +38,29 @@ public class LaneService {
         return repository.save(lane);
     }
 
-    public Lane getLane(Long id){
+    public Lane getLane(Long id) {
         return repository.findById(id)
-                .orElseThrow(()-> new LaneDoesntExistException("Lane not found with this id: " + id));
-
-
+                .orElseThrow(() -> new LaneDoesntExistException("Lane not found with this id: " + id));
     }
 
     @Transactional
-    public void deleteLane(Long id){
+    public void deleteLane(Long id) {
 
-        if(!repository.existsById(id))
+        if (!repository.existsById(id))
             throw new LaneDoesntExistException("Lane not found with this id: " + id);
 
         repository.deleteById(id);
+    }
+
+    public Lane updateLane(UpdateLaneRequest request, Long id) {
+        Lane lane = repository.findById(id)
+                .orElseThrow(() -> new LaneDoesntExistException("Lane not found with this id: " + id));
+
+        if(repository.existsByLaneNumberAndIdNot(request.laneNumber(), id))
+            throw new LaneAlreadyExistsException(request.laneNumber());
+
+        lane.setLaneNumber(request.laneNumber());
+        lane.setStatus(request.status());
+        return repository.save(lane);
     }
 }

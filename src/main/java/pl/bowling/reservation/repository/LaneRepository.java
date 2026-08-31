@@ -5,4 +5,6 @@ import pl.bowling.reservation.entity.Lane;
 
 public interface LaneRepository extends JpaRepository<Lane, Long> {
     boolean existsByLaneNumber(Integer laneNumber);
+
+    boolean existsByLaneNumberAndIdNot(Integer laneNumber, Long id);
 }
