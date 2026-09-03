@@ -1,9 +1,14 @@
 package pl.bowling.reservation.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import pl.bowling.reservation.enums.Status;
 
-
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "lane")
 public class Lane {

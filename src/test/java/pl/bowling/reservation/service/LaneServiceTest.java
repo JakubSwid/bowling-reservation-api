@@ -7,17 +7,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.bowling.reservation.dto.CreateLaneRequest;
+import pl.bowling.reservation.dto.UpdateLaneRequest;
 import pl.bowling.reservation.entity.Lane;
 import pl.bowling.reservation.enums.Status;
 import pl.bowling.reservation.exception.LaneAlreadyExistsException;
+import pl.bowling.reservation.exception.LaneDoesntExistException;
 import pl.bowling.reservation.repository.LaneRepository;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class LaneServiceTest {
@@ -28,6 +32,7 @@ class LaneServiceTest {
     @InjectMocks
     private LaneService service;
 
+    // CreateLane Tests
     @Test
     void shouldSaveLaneWhenNumberIsFree() {
         // given
@@ -50,7 +55,8 @@ class LaneServiceTest {
         when(repository.existsByLaneNumber(5)).thenReturn(true);
 
         // when and then
-        assertThrows(LaneAlreadyExistsException.class, () -> service.createLane(request));
+        assertThatThrownBy(() -> service.createLane(request))
+                .isInstanceOf(LaneAlreadyExistsException.class);
         verify(repository, never()).save(any());
     }
 
@@ -86,4 +92,105 @@ class LaneServiceTest {
         // then
         assertThat(result).isSameAs(savedLane);
     }
+
+    //GetAllLanes test
+    @Test
+    void shouldReturnAllLanes(){
+        //given
+        Lane lane1 = new Lane(1L,1,Status.ACTIVE,1);
+        Lane lane2 = new Lane(2L,2,Status.ACTIVE,1);
+        List<Lane> expectedLanes = List.of(lane1,lane2);
+
+        when(repository.findAll()).thenReturn(expectedLanes);
+
+        //when
+        List<Lane> result = service.getAllLanes();
+
+        //then
+        assertThat(result).isEqualTo(expectedLanes);
+        assertThat(result).hasSize(2);
+    }
+
+    //GetLane tests
+    @Test
+    void shouldReturnLaneWhenExists(){
+        //given
+        Lane lane1 = new Lane(1L,1,Status.ACTIVE,1);
+
+        when(repository.findById(1L)).thenReturn(Optional.of(lane1));
+
+        //when
+        Lane result = service.getLane(1L);
+
+        //then
+        assertThat(result).isEqualTo(lane1);
+        verify(repository).findById(1L);
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenLaneNotFound(){
+        //given
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+
+        //when then
+        assertThatThrownBy(()-> service.getLane(1L))
+                .isInstanceOf(LaneDoesntExistException.class)
+                .hasMessageContaining("Lane not found with this id: ");
+
+        verify(repository).findById(1L);
+
+    }
+    //Delete test(s)
+    @Test
+    void shouldDeleteLane(){
+        when(repository.existsById(1L)).thenReturn(true);
+
+        service.deleteLane(1L);
+
+        verify(repository).deleteById(1L);
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenLaneToDeleteNotFound(){
+        //given
+        when(repository.existsById(1L)).thenReturn(false);
+
+        //when then
+        assertThatThrownBy(()->service.deleteLane(1L))
+                .isInstanceOf(LaneDoesntExistException.class)
+                .hasMessageContaining("Lane not found with this id: ");
+
+        verify(repository).existsById(1L);
+        verify(repository, never()).deleteById(any());
+        verifyNoMoreInteractions(repository);
+    }
+
+    //Update Tests
+    @Test
+    void shouldUpdateLaneHappyPath(){
+        //given
+        Lane existingLane = new Lane(1L,1,Status.ACTIVE,1);
+        when(repository.findById(1L)).thenReturn(Optional.of(existingLane));
+        when(repository.existsByLaneNumberAndIdNot(any(),any())).thenReturn(false);
+
+        when(repository.save(any(Lane.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UpdateLaneRequest request = new UpdateLaneRequest(7,Status.OUT_OF_SERVICE);
+
+        //when
+        Lane result = service.updateLane(request, 1L);
+
+        //then
+        ArgumentCaptor<Lane> captor = ArgumentCaptor.forClass(Lane.class);
+        verify(repository).save(captor.capture());
+
+        Lane savedLane = captor.getValue();
+
+        assertThat(savedLane.getLaneNumber()).isEqualTo(7);
+        assertThat(savedLane.getStatus()).isEqualTo(Status.OUT_OF_SERVICE);
+        assertThat(savedLane).isEqualTo(result);
+    }
+
 }
