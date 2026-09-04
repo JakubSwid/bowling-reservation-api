@@ -192,5 +192,36 @@ class LaneServiceTest {
         assertThat(savedLane.getStatus()).isEqualTo(Status.OUT_OF_SERVICE);
         assertThat(savedLane).isEqualTo(result);
     }
+    @Test
+    void shouldThrowExceptionWhenUpdatingNonExistingLane(){
+        //given
+        when(repository.findById(2137L)).thenReturn(Optional.empty());
 
+
+        UpdateLaneRequest request = new UpdateLaneRequest(2137,Status.OUT_OF_SERVICE);
+
+        //when
+        //then
+        assertThatThrownBy(() -> service.updateLane(request,2137L))
+                .isInstanceOf(LaneDoesntExistException.class)
+                .hasMessageContaining("Lane not found with this id: ");
+
+        verify(repository, never()).save(any(Lane.class));
+    }
+    @Test
+    void shouldThrowExceptionWhenNewNumberTakenByOtherLane() {
+        //given
+        Lane existingLane = new Lane(1L,1,Status.ACTIVE,1);
+        when(repository.findById(1L)).thenReturn(Optional.of(existingLane));
+        when(repository.existsByLaneNumberAndIdNot(2,1L)).thenReturn(true);
+
+        UpdateLaneRequest request = new UpdateLaneRequest(2,Status.OUT_OF_SERVICE);
+
+        //when then
+        assertThatThrownBy(()->service.updateLane(request,1L))
+                .isInstanceOf(LaneAlreadyExistsException.class)
+                .hasMessageContaining("already exists");
+
+        verify(repository, never()).save(any(Lane.class));
+    }
 }
