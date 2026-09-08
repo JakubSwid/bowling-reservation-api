@@ -26,34 +26,4 @@ public class Lane {
     @Version
     private Integer version;
 
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id){
-        this.id = id;
-    }
-
-    public Integer getLaneNumber() {
-        return laneNumber;
-    }
-
-    public void setLaneNumber(Integer laneNumber) {
-        this.laneNumber = laneNumber;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
 }
