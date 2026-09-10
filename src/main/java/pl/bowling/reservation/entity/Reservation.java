@@ -15,34 +15,34 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name ="reservation")
+@Table(name = "reservation")
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name ="lane_id", nullable = false)
+    @JoinColumn(name = "lane_id", nullable = false)
     private Lane lane;
 
-    @Column
-    @NotBlank
+    @Column(nullable = false)
+    @NotNull
     private LocalDateTime startTime;
 
-    @Column
-    @NotBlank
+    @Column(nullable = false)
+    @NotNull
     private LocalDateTime endTime;
 
-    @Column
+    @Column(nullable = false)
     @NotNull
     @Enumerated(EnumType.STRING)
     private ReservationStatus reservationStatus;
 
-    @Column
+    @Column(nullable = false)
     @NotBlank
     private String customerName;
 
-    @Column
+    @Column(nullable = false)
     @NotBlank
     @Email
     private String customerEmail;
