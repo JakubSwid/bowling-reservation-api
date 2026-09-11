@@ -8,6 +8,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.net.URI;
 import java.time.Instant;
 
 @RestControllerAdvice
@@ -15,35 +16,22 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(LaneAlreadyExistsException.class)
-    public ProblemDetail handleLaneAlreadyExists(
-            LaneAlreadyExistsException ex,
-            HttpServletRequest request
-    ) {
-
-        log.warn("Save conflict. Path: {}. Message: {}", request.getRequestURI(), ex.getMessage());
-
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
-
-        problemDetail.setProperty("timestamp", Instant.now());
-        problemDetail.setProperty("path", request.getRequestURI());
-
-        return problemDetail;
+    @ExceptionHandler({LaneDoesntExistException.class, ReservationNotFoundException.class})
+    public ProblemDetail handleNotFound(RuntimeException ex, HttpServletRequest request) {
+        log.warn("Resource not found. Path: {}. Message: {}", request.getRequestURI(), ex.getMessage());
+        return createProblemDetail(HttpStatus.NOT_FOUND, ex.getMessage(), request);
     }
 
-    @ExceptionHandler(LaneDoesntExistException.class)
-    public ProblemDetail handleLaneDoesntExist(
-            LaneDoesntExistException ex,
-            HttpServletRequest request
-    ) {
+    @ExceptionHandler({LaneAlreadyExistsException.class, OverlappingReservationException.class})
+    public ProblemDetail handleConflict(RuntimeException ex, HttpServletRequest request) {
+        log.warn("Conflict detected. Path: {}. Message: {}", request.getRequestURI(), ex.getMessage());
+        return createProblemDetail(HttpStatus.CONFLICT, ex.getMessage(), request);
+    }
 
-        log.warn("Lane not found. Path: {}. Message: {}", request.getRequestURI(), ex.getMessage());
-
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-
+    private ProblemDetail createProblemDetail(HttpStatus status, String detail, HttpServletRequest request) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, detail);
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
         problemDetail.setProperty("timestamp", Instant.now());
-        problemDetail.setProperty("path", request.getRequestURI());
-
         return problemDetail;
     }
 }

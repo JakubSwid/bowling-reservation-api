@@ -10,4 +10,4 @@ CREATE TABLE reservation(
     CONSTRAINT check_time_range CHECK ( start_time < end_time )
 );
 
-CREATE INDEX index_reservation_lane_time ON reservation reservation(lane_id, start_time, end_time);
+CREATE INDEX index_reservation_lane_time ON reservation(lane_id, start_time, end_time);

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.bowling.reservation.dto.CreateReservationRequest;
 import pl.bowling.reservation.dto.ReservationResponse;
 import pl.bowling.reservation.entity.Reservation;
+import pl.bowling.reservation.service.ReservationService;
 
 import java.util.List;
 
@@ -21,9 +22,9 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> create(@RequestBody @Valid CreateReservationRequest request) {
-        Reservation created = service.createReservation(request);
+        ReservationResponse created = service.createReservation(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ReservationResponse.from(created));
+                .body(created);
     }
 
     @GetMapping("/lane/{laneId}")
