@@ -28,7 +28,7 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse createReservation(CreateReservationRequest request) {
-        Lane lane = laneRepository.findById(request.laneId())
+        Lane lane = laneRepository.findByIdWithLock(request.laneId())
                 .orElseThrow(() -> new LaneDoesntExistException("Lane does not exist"));
 
         if (!request.startTime().isBefore(request.endTime())) {
