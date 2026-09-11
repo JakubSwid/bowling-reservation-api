@@ -1,7 +1,7 @@
 services:
-  postgres:
+  db:
     image: postgres:16
-    container_name: bowling-postgres
+    container_name: bowling-db
     environment:
       POSTGRES_DB: bowling
       POSTGRES_USER: bowling
@@ -9,7 +9,25 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bowling -d bowling"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: bowling-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/bowling
+      SPRING_DATASOURCE_USERNAME: bowling
+      SPRING_DATASOURCE_PASSWORD: bowling
+    ports:
+      - "8080:8080"
 
 volumes:
-  pgdata:
+  postgres-data:
