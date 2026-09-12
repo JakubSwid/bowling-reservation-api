@@ -99,9 +99,8 @@ Reservation lifecycle:
 ```
 
 Only `ACTIVE` reservations occupy a time slot; `CANCELLED` and `COMPLETED`
-ones release it. Both entities use `@Version` (optimistic locking). Enums
-are persisted as strings (`@Enumerated(EnumType.STRING)`) for readable data
-and safe debugging.
+ones release it. Enumsare persisted as strings (`@Enumerated(EnumType.STRING)`)
+for readable data and safe debugging.
 
 ## API endpoints
 
